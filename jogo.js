@@ -83,15 +83,15 @@ const chao ={
             )
         },
         atualiza(){
-            chao.x = chao.x - 1;
+            chao.x = chao.x - 2;
             chao.x = chao.x % (chao.largura / 2)
             }
         }
 
 const PlanoDeFundo ={
-    spriteX: 390,
+    spriteX: 390.5,
     spriteY: 0,
-    largura:276,
+    largura:275.5,
     altura: 206,
     x: 0,
     y: canvas.height - 227,
@@ -143,7 +143,68 @@ const telainicial ={
             );
         }
 }
-
+const canos = {
+    largura:52 ,
+    altura:400,
+    ceu:{
+        spriteX: 52,
+        spriteY:169,
+        x:200,
+        y:-170,
+    },
+    chao:{
+        spriteX: 0,
+        spriteY:169,
+    },
+    pares: [],
+    espacamentoEntreCanos: 80,
+    desenha(){
+        const espacamentoEntreCanos = 80;
+        for (i=0;i<canos.pares.length;i++){
+            canos.ceu.x = canos.pares[i].x;
+            canos.ceu.y = canos.pares[i].y;
+            contexto.drawImage(
+                sprites,
+                canos.ceu.spriteX, canos.ceu.spriteY,
+                canos.largura, canos.altura,
+                canos.ceu.x, canos.ceu.y,
+                canos.largura, canos.altura,
+            )
+            const canoChaoX = canos.ceu.x;
+            const canoChaoY = canos.altura + espacamentoEntreCanos + canos.ceu.y
+            contexto.drawImage(
+                sprites,
+                canos.chao.spriteX, canos.chao.spriteY,
+                canos.largura, canos.altura,
+                canoChaoX, canoChaoY,
+                canos.largura, canos.altura,
+            )
+        }
+    },
+    atualiza(){
+        canos.ceu.x = canos.ceu.x - 2;
+        const passou100Frames = (animation_frame % 100 === 0);
+        if(passou100Frames){
+            const novoPar = {
+                x: canvas.clientWidth,
+                y: -150 * (Math.random() + 1 )
+            }
+            canos.pares.push(novoPar);
+        }
+        for(i=0;i<canos.pares.length;i++){
+            const par = canos.pares[i];
+            par.x = par.x - 2;
+            if(par.x + canos.largura <= 0){
+                canos.pares.shift();
+            }
+            if(fazColisaoObstaculo(par)){
+                som_punch.play();
+                telaAtiva = TelaInicio;
+                return;
+            }
+        }        
+    }
+}
 const ceu={
     desenha(){
         contexto.fillStyle = '#70c5ce';
@@ -166,11 +227,15 @@ const TelaJogo ={
     desenha(){
         ceu.desenha();
         PlanoDeFundo.desenha();
-        chao.desenha();
+        
         flappyBird.desenha();
         flappyBird.atualiza();
+        canos.desenha();
+        canos.atualiza();
+        chao.desenha();
         chao.atualiza();
         PlanoDeFundo.atualiza();
+        
     },
     click(){
         flappyBird.pula();
@@ -192,8 +257,23 @@ function fazColisao(){
     }
     else{
         return true
+    }   
+}
+function fazColisaoObstaculo(par){
+    if(flappyBird.x >= par.x){
+        const alturaCabecaFlappy = flappyBird.y;
+        const alturaPeFlappy = flappyBird.y + flappyBird.altura;
+        const bocaCanoCeuY = par.y + canos.altura;
+        const bocaCanoChaoY = par.y + canos.altura + canos.espacamentoEntreCanos;
+        if(alturaCabecaFlappy <= bocaCanoCeuY){
+            return true
+        }
+        if(alturaPeFlappy >= bocaCanoChaoY){
+            return true
+        }
     }
-        
+    
+    return false;
 }
 window.addEventListener("click", mudaTelaAtiva)
 loop();
