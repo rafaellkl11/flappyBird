@@ -144,7 +144,7 @@ const telainicial ={
         }
 }
 const canos = {
-    largura:52 ,
+    largura:52  ,
     altura:400,
     ceu:{
         spriteX: 52,
