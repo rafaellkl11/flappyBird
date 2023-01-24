@@ -49,7 +49,7 @@ const flappyBird = {
     atualiza(){
         if (fazColisao()){
             som_punch.play();
-            telaAtiva = TelaInicio;
+            telaAtiva = telaGameOver;
             return;
         }
         flappyBird.velocidade += flappyBird.gravidade;
@@ -199,10 +199,43 @@ const canos = {
             }
             if(fazColisaoObstaculo(par)){
                 som_punch.play();
-                telaAtiva = TelaInicio;
+                telaAtiva = telaGameOver;
                 return;
             }
         }        
+    }
+}
+const placar ={
+    pontos: 0,
+    desenha(){
+        contexto.font = '25px "VT323"';
+        contexto.textAlign = 'left';
+        contexto.fillStyle = 'white';
+        contexto.fillText('Pontuação: ' + placar.pontos, 25, 35);
+    },
+    atualiza(){
+        const intervaloDeFrames = 20;
+        const passouOIntervalo =animation_frame % intervaloDeFrames === 0;
+        if(passouOIntervalo){
+            placar.pontos = placar.pontos + 1;
+        }
+    }
+} 
+const gameOver ={
+    spriteX: 134,
+    spriteY: 153,
+    largura: 226,
+    altura:200,
+    x: 50,
+    y: 70,
+    desenha(){
+        contexto.drawImage(
+            sprites,
+            gameOver.spriteX, gameOver.spriteY,
+            gameOver.largura, gameOver.altura,
+            gameOver.x, gameOver.y,
+            gameOver.largura, gameOver.altura
+        )
     }
 }
 const ceu={
@@ -227,7 +260,6 @@ const TelaJogo ={
     desenha(){
         ceu.desenha();
         PlanoDeFundo.desenha();
-        
         flappyBird.desenha();
         flappyBird.atualiza();
         canos.desenha();
@@ -235,10 +267,19 @@ const TelaJogo ={
         chao.desenha();
         chao.atualiza();
         PlanoDeFundo.atualiza();
-        
+        placar.desenha();
+        placar.atualiza();        
     },
     click(){
         flappyBird.pula();
+    }
+}
+const telaGameOver ={
+    desenha(){
+        gameOver.desenha();
+    },
+    click(){
+
     }
 }
 var telaAtiva = TelaInicio
